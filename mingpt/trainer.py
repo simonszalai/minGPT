@@ -192,7 +192,7 @@ class Trainer:
                 
             if not is_train:
                 test_loss = float(jnp.mean(jnp.array(losses)))
-                logger.info(f"test loss: {test_loss}")
+                print(f"test loss: {test_loss}")
                 return test_loss
             
             return params, opt_state, it
