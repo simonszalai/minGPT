@@ -92,8 +92,8 @@ def configure_decay_mask(params):
     
     mask = check_decay(params, -1)
     # validate that we considered every parameter
-    assert all([decays >= 0 for decays in jax.tree_flatten(mask)[0]])
-    return jax.tree_map(lambda x: x == 1, mask)
+    assert all([decays >= 0 for decays in jax.tree_util.tree_flatten(mask)[0]])
+    return jax.tree_util.tree_map(lambda x: x == 1, mask)
 
 def pmap_batch(batch):
     """Splits the first axis of `arr` evenly across the number of devices."""
@@ -102,10 +102,10 @@ def pmap_batch(batch):
     return batch.reshape(local_device_count(), per_device_batch_size, *batch.shape[1:])
 
 def pmap_on(tree):
-    return jax.tree_map(lambda x: jnp.array([x] * local_device_count()), tree)
+    return jax.tree_util.tree_map(lambda x: jnp.array([x] * local_device_count()), tree)
 
 def pmap_off(tree):
-    return jax.device_get(jax.tree_map(lambda x: x[0], tree))
+    return jax.device_get(jax.tree_util.tree_map(lambda x: x[0], tree))
 
 class Trainer:
     def __init__(self, hk_loss_fn, train_dataset, test_dataset, config):
@@ -126,7 +126,7 @@ class Trainer:
         batch = next(iter(train_dl))
         xs, ys = map(jnp.array, batch)
         params = self.hk_loss_fn.init(subkey, xs, ys)
-        logger.info("number of parameters: %d", sum([leave.size for leave in jax.tree_leaves(params)]))
+        logger.info("number of parameters: %d", sum([leave.size for leave in jax.tree_util.tree_leaves(params)]))
         return params
             
     def train(self, params, opt_state=None):
